@@ -10,7 +10,7 @@ are separated by spaces and the spaces are transformed to <blanks>.
 
 import sys
 
-def preprocess(inf, outf, lowercase=True):
+def preprocess(inf, outf, lowercase=False):
     with open(outf, mode="w") as out:
         for line in open(inf):
             if lowercase:
