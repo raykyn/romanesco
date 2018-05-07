@@ -41,11 +41,12 @@ def train(data: str, epochs: int, batch_size: int, vocab_max_size: int,
         summary_writer = tf.summary.FileWriter(log_to, graph=tf.get_default_graph())
         # iterate over training data `epoch` times
         for epoch in range(1, epochs + 1):
+            _current_state = np.zeros((NUM_LAYERS, 2, batch_size, STATE_SIZE))
             total_loss = 0.0
             total_iter = 0
             for x, y in reader.iterate(raw_data, batch_size, NUM_STEPS):
-                l, _, s = session.run([loss, train_step, summary],
-                                      feed_dict={inputs: x, targets: y})
+                l, _, _current_state, s = session.run([loss, train_step, current_state, summary],
+                                      feed_dict={inputs: x, targets: y, init_state: _current_state})
                 summary_writer.add_summary(s, total_iter)
                 total_loss += l
                 total_iter += 1

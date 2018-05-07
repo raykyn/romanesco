@@ -20,7 +20,7 @@ def define_computation_graph(vocab_size: int, batch_size: int):
     state_per_layer_list = tf.unpack(init_state, axis=0)
     rnn_tuple_state = tuple(
         [tf.nn.rnn_cell.LSTMStateTuple(state_per_layer_list[idx][0], state_per_layer_list[idx][1])
-         for idx in range(NUM_LAYERS)]
+         for idx in range(num_layers)]
     )
 
     with tf.name_scope('Embedding'):
@@ -28,10 +28,10 @@ def define_computation_graph(vocab_size: int, batch_size: int):
         input_embeddings = tf.nn.embedding_lookup(embedding, inputs)
 
     with tf.name_scope('RNN'):
-        cell = tf.nn.rnn_cell.LSTMCell(STATE_SIZE, state_is_tuple=True)
+        cell = tf.nn.rnn_cell.LSTMCell(HIDDEN_SIZE, state_is_tuple=True)
         # cell = tf.nn.rnn_cell.DropoutWrapper(cell, output_keep_prob=0.5)
-        cell = tf.nn.rnn_cell.MultiRNNCell([cell] * NUM_LAYERS, state_is_tuple=True)
-        rnn_outputs, current_state = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=rnn_tuple_state)
+        initial_state = cell.zero_state(batch_size, tf.float32)
+        rnn_outputs, rnn_states = tf.nn.dynamic_rnn(cell, input_embeddings, initial_state=initial_state)
 
     with tf.name_scope('Final_Projection'):
         w = tf.get_variable('w', shape=(HIDDEN_SIZE, vocab_size))

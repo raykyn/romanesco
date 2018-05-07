@@ -10,3 +10,6 @@ VOCAB_FILENAME = 'vocab.json'
 NUM_STEPS = 35 # truncated backprop length
 LEARNING_RATE = 0.0001
 HIDDEN_SIZE = 1500 # layer size
+
+NUM_LAYERS = 3
+STATE_SIZE = 4
