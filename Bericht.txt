@@ -1,4 +1,4 @@
-Bericht
+Bericht (von Ismail Prada)
 ========================================================================
 
 Motivation:
@@ -77,6 +77,12 @@ Dropout-Verfahren:
     
 An den Hyperparametern habe ich nichts geändert. Mein Vokabular war
 z.B. ohnehin schon so klein, dass ich da kein Limit einführen musste.
+
+Ich habe zuletzt noch versucht Multilayered RNN zu implementieren mithilfe
+dieses Guides: https://medium.com/@erikhallstrm/using-the-tensorflow-multilayered-lstm-api-f6e7da7bbe40
+Gelaufen ist es schliesslich, aber mit Perplexity über 20, daher nehme ich an,
+dass ich irgendetwas falsch gemacht habe. ¯\_(ツ)_/¯
+Dafür habe ich keine wirkliche Begründung, da das reines experimentieren war.
 
 
 Testläufe:
@@ -179,12 +185,18 @@ Tatsächlich führte die Benutzung des Dropoutlayers (nach der Korrektur
 beim Scoring) zu einer (kleinen) Verbesserung des Ergebnisses, während
 die anderen Versuche wie LSTM und Peepholes zu keinem besseren Ergebnis geführt haben.
 
+Ich möchte dazu noch schreiben, dass ich die Wahl meines Korpus zum Schluss
+etwas bereut hatte, da schon die ersten Ergebnisse brauchbare Ergebnisse
+(für meinen Zweck) lieferten, wodurch sich sämtliches adaptieren sinnlos 
+anfühlte. :-(
+
 
 Sampling-Resultate
 ========================================================================
 Die Ausgaben des Modells, das gegen das Devset am besten abgeschnitten hat,
-sind unter <PLATZHALTER> zu finden.
-
+sind unter romanesco/sampled_names_LSTM_Drop_20_Ep.txt zu finden.
+Ausserdem habe ich auch noch ein paar japanische Namen generiert, auch 
+die finden sich da :-)
 
 
 
