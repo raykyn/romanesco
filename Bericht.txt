@@ -1,0 +1,190 @@
+Bericht
+========================================================================
+
+Motivation:
+========================================================================
+Für ein kleines Hobbyprojekt von mir habe ich mich vor einiger Zeit
+mit der automatischen Generierung von Ortsnamen beschäftigt basierend
+auf echten Ortsnamen. Dazu habe ich ngram-Modelle auf Listen echter Ortsnamen
+trainiert und dann basierend auf den erkannten Wahrscheinlichkeiten neue
+Namen generiert. Hier ein paar Beispiele:
+Kröbrüzendow
+Staach
+Criedden
+Rockrundorg
+Witingen
+Mossersdorf
+Altrahden
+Holgau
+Wasburbachree
+Vögerste
+Während einige davon sich passend anhören, sind viele sehr eigenartig.
+Ich möchte die Gelegenheit nutzen, das RNN auf meiner Ortsnamenliste zu 
+trainieren, und dann Ortsnamen zu generieren.
+Ich habe Listen für verschiedene Länder, aber in diesem Bericht konzentriere
+ich mich auf die Ergebnisse des deutschen Datensets.
+
+Datenset:
+========================================================================
+Die Daten habe ich von folgender Seite bezogen: http://www.ling.uni-potsdam.de/~kolb/DE-Ortsnamen.txt
+Die Datei enthält insgesamt 11740 deutsche Ortsnamen (keine schweizer und österreichischen).
+
+
+Preprocessing:
+========================================================================
+Da ich neue Token generieren wollte, musste ich auf Zeichenebene arbeiten. 
+Ich habe daher, wie in dem README beschrieben ist, alle Zeichen voneinander
+getrennt und die ursprünglichen Leerschläge durch "<blank>"-Token ersetzt.
+Fraglich war anfangs für mich, ob ich die Namen lowercasen sollte, oder nicht.
+Ich habe schliesslich Testläufe mit und ohne Lowercasing durchgeführt,
+und da die Grossbuchstaben auch schon bei wenigen Epochen korrekt am Anfang
+der Worte gesetzt werden, habe ich schliesslich beschlossen, auf lowercasing
+zu verzichten und die Buchstaben original zu belassen.
+
+Ich habe mir auch überlegt, ob eine Anwendung von BPE hier sinnvoll wäre.
+Ich konnte mir jedoch keine Verbesserung dadurch vorstellen, und habe daher
+auf den Aufwand verzichtet.
+
+Ich hatte auch noch Rohdaten für weitere Sprachen vorbereitet. 
+Diese habe ich von GeoNames bezogen und mit einem eigenen Skript 
+extrahiert.
+
+
+Testläufe:
+========================================================================
+Im folgenden beschreibe ich die erfolgten Testläufe.
+Ich habe mir erlaubt, auch die Ergebnisse des Scorings auf den Devsets
+und die Ergebnisse des Samplings hier einzubinden.
+
+Ein X hinter einem Samling-Namen bedeutet einen Namen, der sich einigermassen
+deutsch anhört.
+
+Bei lowercase ist die Perplexität von Anfang an sehr viel niedriger dank
+kleinerem Vokabular.
+
+
+Adaptionen:
+========================================================================
+LSTMCell (Mit und ohne Peephole) statt BasicLSTMCell:
+- Diese Veränderung habe ich eher aus Neugier gemacht. Ich wollte einfach mal
+    sehen, inwiefern sich die Ergebnisse verändern.
+
+Dropout-Verfahren:
+- https://arxiv.org/pdf/1207.0580v1.pdf
+- Da Overfitting ein ernstzunehmendes Problem ist, gerade bei einem doch
+    eher kleinen Datenset für RNN-ML, wollte ich ausprobieren, ob der 
+    Vorschlag hier eine Verbesserung herbeiführen kann.
+    
+An den Hyperparametern habe ich nichts geändert. Mein Vokabular war
+z.B. ohnehin schon so klein, dass ich da kein Limit einführen musste.
+
+
+Testläufe:
+========================================================================
+
+
+Test 100 Epochen lowercased:
+===============================
+Nach der 87. Epoche keine (nennenswerte) Veränderung mehr: 1.2 Perplexität.
+58.49 gegen das Devset!
+
+
+Test 10 Epochen normalcase:
+===============================
+6.32 nach 10. Epoche
+Vergleich gegen Dev-Set: 6.52
+
+
+Test 20 Epochen normalcase:
+===============================
+5.04 nach 20. Epoche.
+6.16 gegen Dev-Set.
+
+
+Test 30 Epochen normalcase:
+===============================
+3.48 nach 30. Epoche.
+6.98 gegen Dev-Set!
+
+
+Test 20 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM
+===============================
+4.41 nach 20. Epoche!
+6.52 gegen Devset! (Schlechter als mit BasicLSTM, Overfitting?)
+
+Test 10 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM
+===============================
+6.17 nach 10. Epoche.
+6.55 gegen Devset.
+
+Test 20 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM + Peepholes
+===============================
+4.5 nach 20. Epoche.
+6.47 gegen Devset.
+
+Test 10 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM + Peepholes
+===============================
+6.14 nach 10. Epoche.
+6.51 gegen Devset.
+
+=> Da die Peepholes keine Verbesserung gebracht haben, 
+    habe ich sie wieder entfernt.
+    
+Test 30 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM + DropoutWrapper
+===============================
+3.81 nach 30. Epoche
+7.99 gegen Devset. (Noch schlechter als 30 ohne Dropout!?)
+Zweiter Versuch, beim ersten hatte ich das Dropoutlayer auch während
+dem Scoring aktiviert, was die Ergebnisse verzerrt.
+Neues Ergebnis: 7.19
+
+
+Test 20 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM + DropoutWrapper
+===============================
+5.4 nach 20. Epoche. 
+6.48 gegen Devset.
+Zweiter Versuch, beim ersten hatte ich das Dropoutlayer auch während
+dem Scoring aktiviert, was die Ergebnisse verzerrt.
+Neues Ergebnis: 6.1 <= Neues bestes Ergebnis!
+
+
+Test 10 Epochen normalcase
++ Adaption: LSTM statt BasicLSTM + DropoutWrapper
+===============================
+6.55 nach 10. Epoche.
+6.86 gegen Devset.
+Zweiter Versuch, beim ersten hatte ich das Dropoutlayer auch während
+dem Scoring aktiviert, was die Ergebnisse verzerrt.
+Neues Ergebnis: 6.61
+
+
+Reflexion:
+========================================================================
+Interessant ist, dass die Perplexität gemessen am Devset bei höheren Epochen
+auch steigen kann. Ich denke, dies wäre mit einer Art Overfitting zu erklären.
+
+Obwohl die 100 Epochen eine enorm hohe Perplexität gegenüber dem Devset
+aufweisen (Overfitting!), sind die daraus generierten Namen sehr gut.
+Man merkt jedoch, dass die Anfänge der Namen öfter mal holprig klingen.
+Daher denke ich, es war eine gute Entscheidung, für die anderen Testläufe
+kein lowercasing zu benutzen.
+
+Tatsächlich führte die Benutzung des Dropoutlayers (nach der Korrektur
+beim Scoring) zu einer (kleinen) Verbesserung des Ergebnisses, während
+die anderen Versuche wie LSTM und Peepholes zu keinem besseren Ergebnis geführt haben.
+
+
+Sampling-Resultate
+========================================================================
+Die Ausgaben des Modells, das gegen das Devset am besten abgeschnitten hat,
+sind unter <PLATZHALTER> zu finden.
+
+
+
+
